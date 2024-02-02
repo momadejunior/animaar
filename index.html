@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>final</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.3.1/aframe/build/aframe-ar.js"></script>
+</head>
+<body>
+    
+    <a-scene embedded arjs="debugUIEnabled: false;">
+
+        <a-assets>
+            <video id="kachowsky" autoplay muted src="./video/2024_Kachowsky.mp4"></video>
+            <video id="boca" autoplay muted src="./video/2024_Nandele.mp4"></video>
+            <video id="nandele-two" muted autoplay src="./video/2024_NandeleFeatHakwai.mp4"></video>
+            <video id="tushimitsu" muted autoplay src="./video/2024_Tushimitsu.mp4"></video>
+        </a-assets>
+
+        <a-marker type="pattern" url="./patt/pattern-acromatica.patt" markerhandler="onMarkerFound">
+            <a-video src="#kachowsky" position='0 0.5 -2' depth="0.5" rotation="-90" scale="4 3"></a-video>
+        </a-marker>
+
+        <a-marker type="pattern" url="./patt/pattern-boca.patt" markerhandler="onMarkerFound2">
+            <a-image src="#boca" position='0 0.5 -2' depth="0.5" rotation="-90" scale="4 3"></a-image>
+        </a-marker>
+
+        <a-marker type="pattern" url="./patt/pattern-xipito.patt" markerhandler="onMarkerFound3">
+            <a-video src="#nandele-two" position='0 0.5 -2' depth="0.5" rotation="-90" scale="4 3"></a-video>
+        </a-marker>
+
+        <a-marker type="pattern" url="./patt/pattern-final-boss.patt" markerhandler="onMarkerFound4">
+            <a-video src="#tushimitsu" position='0 0.5 -2' depth="0.5" rotation="-90" scale="4 3"></a-video>
+        </a-marker>
+    </a-scene>
+
+    <script>
+        let markerFound = false;
+
+        let videoKachowsky = document.getElementById("kachowsky");
+        let videoBoca = document.getElementById("boca");
+        let videoNandeleTwo = document.getElementById("nandele-two");
+        let videoTushimitsu = document.getElementById("tushimitsu");
+
+        function onMarkerFound() {
+            if (!markerFound) {
+                markerFound = true;
+                videoKachowsky.play();
+                videoKachowsky.currentTime = 0;
+            }
+        }
+
+        function onMarkerFound2() {
+            if (!markerFound) {
+                markerFound = true;
+                videoBoca.play();
+                videoBoca.currentTime = 0;
+            }
+        }
+
+        function onMarkerFound3() {
+            if (!markerFound) {
+                markerFound = true;
+                videoNandeleTwo.play();
+                videoNandeleTwo.currentTime = 0;
+            }
+        }
+
+        function onMarkerFound4() {
+            if (!markerFound) {
+                markerFound = true;
+                videoTushimitsu.play();
+                videoTushimitsu.currentTime = 0;
+            }
+        }
+    </script>
+    
+</body>
+</html>

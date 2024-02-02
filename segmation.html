@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ 
+  <style>
+    body{
+      font-family: Tahoma;
+    }
+    #virtualBackgrounds img{
+      height: 50px;
+    }
+    .container{
+      margin:auto;
+      width: 800px;
+      text-align:center;
+    }
+  </style>
+ 
+</head>
+<body>
+   
+  <div class="container">
+     
+    <video id="localVideo" autoplay muted controls playsinline width="800px"> </video>
+ 
+    <div class="d-block">
+      <button id="start_publish">Publish</button>
+      <button id="stop_publish">Unpublish</button>
+      <p id="status">Status:Offline</p>
+    </div>
+ 
+ 
+   <div class="col-sm-12 text-center" id="virtualBackgrounds">
+      <h3>Select a virtual background Image</h3>
+      <div class="d-flex" id="virtualbackgroundimages">
+ 
+        <img src="./images/noeffect-background.png"  id="noeffect" class="backgroundImages selected" />
+        <img src="./images/blur-background.png" id="blur" class="backgroundImages " />
+        <img src="./images/virtual-background.png" id="antMediaBackground" class="backgroundImages "/>
+        <img src="./images/cloud-background.png" class="backgroundImages"/>
+ 
+        <img src="./images/unsplash.jpg" class="backgroundImages"/>
+        <img src="./images/huy.jpg" class="backgroundImages"/>
+        <img src="./images/mokry.jpg" class="backgroundImages"/>
+        <img src="./images/mitchell.jpg" class="backgroundImages"/>
+      </div>
+ 
+      <div class="d-block">
+      <h3>Upload a Virtual Background Image</h3>
+      <input type="file" class="custom-file-input" id="customFile" style="height:100%;" accept=".jpg, .png, .jpeg">
+      </div>
+    </div>
+      
+   </div>
+ 
+   <script type="module">
+ 
+   import {WebRTCAdaptor, VideoEffect} from "./node_modules/@antmedia/webrtc_adaptor/dist/es/index.js";
+ 
+   $(".backgroundImages").click(enableVirtualBackground);
+ 
+   $('input[type="file"]').change(function(e) {
+        const url = URL.createObjectURL(e.target.files[0]);
+        const newBackgroundImg = $("<img src=\"" + url + "\" class=\"backgroundImages\"/>");
+        $("#virtualbackgroundimages").append(newBackgroundImg);
+        $(".backgroundImages").click(enableVirtualBackground);
+        newBackgroundImg.click();
+    });
+ 
+   function enableVirtualBackground() {
+        var effectName;
+        if ($(this).attr("id") == "blur") {
+            effectName = VideoEffect.BLUR_BACKGROUND;
+        }
+        else if ($(this).attr("id") == "noeffect") {
+            effectName = VideoEffect.NO_EFFECT;
+        }
+        else {
+            effectName = VideoEffect.VIRTUAL_BACKGROUND;
+            webRTCAdaptor.setBackgroundImage(this);
+        }
+        webRTCAdaptor.enableEffect(effectName).then(() => {
+            console.log("Effect: "+ effectName+" is enabled");
+        }).catch(err => {
+            console.error("Effect: "+ effectName+" is not enabled. Error is " + err);
+            $.notify(err.name, {
+                autoHideDelay:5000,
+                className:'error',
+                position:'top center'
+            });
+        });
+        $(this).addClass("selected");
+    }
+ 
+    const webRTCAdaptor = new WebRTCAdaptor({
+      websocket_url: "wss://ant-media-server:5443/LiveApp/websocket",
+      localVideoElement: document.getElementById("localVideo"),
+      mediaConstraints: {
+        video: true,
+        audio:true
+      },
+      callback: (info, obj) => {
+        console.log("callback info: " + info);
+        if (info == "publish_started") {
+            console.log("publish started");
+            statusInfo.innerHTML = "Status:Broadcasting"
+        }
+        else if (info == "publish_finished") {
+            console.log("publish finished")
+            statusInfo.innerHTML = "Status:Offline"
+        }
+        else if( info == "available_devices"){
+          console.log(obj)
+        }
+      },
+      callbackError: function (error, message) {
+        //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
+        console.log("error callback: " + JSON.stringify(error));
+      }
+       
+    });
+ 
+    //get random streamId
+    const streamId = "stream" + parseInt(Math.random()*999999);
+    const startPublishButton = document.getElementById("start_publish")
+    const stopPublishButton = document.getElementById("stop_publish")
+    const statusInfo = document.getElementById("status");
+ 
+    startPublishButton.addEventListener("click", () => {
+      console.log("start publish is clicked " + streamId);
+      webRTCAdaptor.publish(streamId);
+    });
+ 
+    stopPublishButton.addEventListener("click", () => {
+      console.log("stop publish is clicked");
+      webRTCAdaptor.stop(streamId);
+    });
+ 
+</script>
+</body>
+</html>
